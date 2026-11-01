@@ -6,7 +6,7 @@ import { getProducts, listStores, type ProductFilter } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import { CATEGORIES } from "@/lib/logic/constants";
 import ProductCard from "@/components/ProductCard";
-import { Empty, Loading } from "@/components/ui";
+import { Empty, Img, Loading } from "@/components/ui";
 
 function Browse() {
   const params = useSearchParams();
@@ -29,6 +29,16 @@ function Browse() {
     (all ?? []).forEach((p) => p.stock.forEach((s) => s.quantity > 0 && set.add(s.size)));
     return [...set].sort((a, b) => (isNaN(+a) || isNaN(+b) ? a.localeCompare(b) : +a - +b));
   }, [all]);
+  const tiles = useMemo(
+    () =>
+      CATEGORIES.map((name) => {
+        const items = (all ?? []).filter((p) => p.category === name);
+        return { name, count: items.length, image: items.find((p) => p.images[0])?.images[0] };
+      })
+        .filter((t) => t.count > 0)
+        .sort((a, b) => b.count - a.count),
+    [all],
+  );
   const approvedStores = (stores ?? []).filter((s) => s.status === "approved");
 
   return (
@@ -38,16 +48,28 @@ function Browse() {
         <p className="mt-2 max-w-xl text-accent-strong/80">Ό,τι περίσσεψε από τη σεζόν, από πραγματικά καταστήματα με ΑΦΜ.</p>
       </section>
 
-      <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0">
-        <button className="chip shrink-0" aria-pressed={category === ""} onClick={() => setCategory("")}>
-          Όλα
-        </button>
-        {CATEGORIES.map((c) => (
-          <button key={c} className="chip shrink-0" aria-pressed={category === c} onClick={() => setCategory(category === c ? "" : c)}>
-            {c}
-          </button>
-        ))}
-      </div>
+      {category === "" ? (
+        tiles.length > 0 && (
+          <section className="mb-6" aria-label="Κατηγορίες">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {tiles.map((t) => (
+                <button key={t.name} className="card group overflow-hidden text-left transition hover:border-accent" onClick={() => setCategory(t.name)}>
+                  <Img src={t.image} alt="" className="aspect-[4/3] w-full object-cover transition group-hover:scale-[1.02]" />
+                  <div className="p-3">
+                    <div className="font-bold leading-snug">{t.name}</div>
+                    <div className="text-sm text-muted">{t.count} {t.count === 1 ? "προϊόν" : "προϊόντα"}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )
+      ) : (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <button className="btn btn-outline btn-sm" onClick={() => setCategory("")}>← Όλες οι κατηγορίες</button>
+          <h2 className="h2">{category}</h2>
+        </div>
+      )}
 
       <div className="mb-5 grid grid-cols-2 gap-2 md:grid-cols-4">
         <select className="input" value={size} onChange={(e) => setSize(e.target.value)} aria-label="Μέγεθος">
