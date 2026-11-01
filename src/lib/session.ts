@@ -32,7 +32,7 @@ function setSession(session: Session | null) {
   window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
-export function consumeLink(rawEmail: string, role: User["role"]): Session {
+export function consumeLink(rawEmail: string, role: User["role"], profile: { name?: string; phone?: string } = {}): Session {
   const email = rawEmail.trim().toLowerCase();
   if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error("Βάλε ένα έγκυρο email");
   const db = loadDb();
@@ -46,7 +46,7 @@ export function consumeLink(rawEmail: string, role: User["role"]): Session {
     session = { email, role, storeId: store.id };
   } else {
     if (!db.users.some((u) => u.email === email && u.role === "customer")) {
-      db.users.push({ email, role: "customer" });
+      db.users.push({ email, role: "customer", ...profile });
       saveDb(db);
     }
     session = { email, role };

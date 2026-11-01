@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { subscribe } from "./storage";
-import { getSession, SESSION_EVENT, type Session } from "./session";
+import { effectiveStoreId, getSession, SESSION_EVENT, type Session } from "./session";
 
 /** Runs an api function on mount and again whenever the browser store changes. */
 export function useApi<T>(fn: () => Promise<T>, deps: unknown[] = []) {
@@ -25,6 +25,12 @@ export function useApi<T>(fn: () => Promise<T>, deps: unknown[] = []) {
   }, deps);
 
   return { data, error, loading: data === undefined && !error };
+}
+
+/** Store the current session manages (the admin's "manage as" store counts). Only used under StoreGate. */
+export function useStoreId() {
+  const session = useSession();
+  return { storeId: effectiveStoreId(session ?? null) ?? "", isAdmin: session?.role === "admin" };
 }
 
 /** undefined while mounting (avoids hydration mismatch), null when logged out. */
