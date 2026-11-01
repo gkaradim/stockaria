@@ -6,9 +6,10 @@ import { listOrders } from "@/lib/api";
 import { useApi, useStoreId } from "@/lib/hooks";
 import { formatEUR } from "@/lib/logic/money";
 import type { OrderStatus } from "@/lib/types";
+import ScrollRows from "@/components/ScrollRows";
 import { Empty, Loading, StatusBadge, statusLabel } from "@/components/ui";
 
-const FILTERS: (OrderStatus | "")[] = ["", "new", "preparing", "shipped", "delivered", "cancelled", "returned"];
+const FILTERS: (OrderStatus | "")[] = ["", "new", "completed", "cancelled", "returned"];
 
 export default function StoreOrders() {
   const { storeId } = useStoreId();
@@ -28,7 +29,7 @@ export default function StoreOrders() {
       ) : !orders || orders.length === 0 ? (
         <Empty>Δεν υπάρχουν παραγγελίες.</Empty>
       ) : (
-        <ul className="space-y-3">
+        <ScrollRows className="space-y-3">
           {orders.map((o) => (
             <li key={o.id}>
               <Link href={`/store/order/?id=${o.id}`} className="card flex items-center justify-between gap-3 p-4">
@@ -43,7 +44,7 @@ export default function StoreOrders() {
               </Link>
             </li>
           ))}
-        </ul>
+        </ScrollRows>
       )}
     </div>
   );

@@ -7,11 +7,25 @@ export const QUOTA_EVENT = "stockaria:quota";
 
 const hasWindow = () => typeof window !== "undefined";
 
+/** Older saved data used the steps preparing/shipped/delivered, which no longer exist. */
+function migrate(db: Db): Db {
+  for (const o of db.orders as (Db["orders"][number] & { deliveredAt?: string })[]) {
+    const status = o.status as string;
+    if (status === "preparing") o.status = "new";
+    else if (status === "shipped" || status === "delivered") {
+      o.status = "completed";
+      o.completedAt = o.completedAt ?? o.deliveredAt ?? o.createdAt;
+    }
+    delete o.deliveredAt;
+  }
+  return db;
+}
+
 export function loadDb(): Db {
   if (!hasWindow()) return seedDb();
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as Db;
+    if (raw) return migrate(JSON.parse(raw) as Db);
   } catch {
     /* fall through to a fresh seed */
   }

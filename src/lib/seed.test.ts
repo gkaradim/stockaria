@@ -11,10 +11,10 @@ describe("seedDb", () => {
     expect(db.stores.filter((s) => s.status === "pending")).toHaveLength(1);
     expect(db.products).toHaveLength(18);
   });
-  it("gives each approved store delivered history, one fresh order and a positive balance", () => {
+  it("gives each approved store completed history, one fresh order and a positive balance", () => {
     for (const id of ["s1", "s2", "s3"]) {
       const orders = db.orders.filter((o) => o.storeId === id);
-      expect(orders.filter((o) => o.status === "delivered")).toHaveLength(3);
+      expect(orders.filter((o) => o.status === "completed")).toHaveLength(3);
       expect(orders.filter((o) => o.status === "new")).toHaveLength(1);
       expect(storeBalance(db, id)).toBeGreaterThan(0);
       expect(storeStats(db, id, "2026-10-01T00:00:00Z").orders).toBe(4);

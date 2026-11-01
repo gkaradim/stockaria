@@ -7,14 +7,6 @@ import { getOrder, getStore, requestReturn } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import { formatEUR } from "@/lib/logic/money";
 import { Empty, ErrorNote, Loading, StatusBadge } from "@/components/ui";
-import type { OrderStatus } from "@/lib/types";
-
-const STEPS: { status: OrderStatus; label: string }[] = [
-  { status: "new", label: "Παραγγελία" },
-  { status: "preparing", label: "Ετοιμάζεται" },
-  { status: "shipped", label: "Στάλθηκε" },
-  { status: "delivered", label: "Παραδόθηκε" },
-];
 
 function OrderTracking() {
   const id = useSearchParams().get("id") ?? "";
@@ -26,9 +18,8 @@ function OrderTracking() {
   if (loading) return <Loading />;
   if (!order) return <div className="page"><Empty>Δεν βρέθηκε η παραγγελία.</Empty></div>;
 
-  const current = STEPS.findIndex((s) => s.status === order.status);
-  const daysSince = order.deliveredAt ? (nowMs - new Date(order.deliveredAt).getTime()) / 86400000 : 0;
-  const canReturn = order.status === "delivered" && daysSince <= 14 && !order.returnRequested;
+  const daysSince = order.completedAt ? (nowMs - new Date(order.completedAt).getTime()) / 86400000 : 0;
+  const canReturn = order.status === "completed" && daysSince <= 14 && !order.returnRequested;
 
   return (
     <div className="page max-w-2xl">
@@ -42,16 +33,7 @@ function OrderTracking() {
         <p className="mb-5 rounded-xl bg-danger-soft p-3 text-sm text-danger">Η παραγγελία ακυρώθηκε{order.cancelReason ? `: ${order.cancelReason}` : ""}. Θα γίνει επιστροφή των χρημάτων.</p>
       ) : order.status === "returned" ? (
         <p className="mb-5 rounded-xl bg-stone-100 p-3 text-sm">Η επιστροφή ολοκληρώθηκε. Τα χρήματα επιστρέφονται.</p>
-      ) : (
-        <ol className="mb-5 grid grid-cols-4 gap-1 text-center text-xs">
-          {STEPS.map((s, i) => (
-            <li key={s.status}>
-              <div className={`mb-1 h-1.5 rounded-full ${i <= current ? "bg-accent" : "bg-line"}`} />
-              <span className={i <= current ? "font-semibold" : "text-muted"}>{s.label}</span>
-            </li>
-          ))}
-        </ol>
-      )}
+      ) : null}
 
       {order.trackingCode && (
         <div className="mb-5 card p-4 text-sm">

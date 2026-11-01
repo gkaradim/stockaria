@@ -3,6 +3,7 @@
 import { listOrders, listStores } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import { formatEUR } from "@/lib/logic/money";
+import ScrollRows from "@/components/ScrollRows";
 import { Empty, Loading, StatusBadge } from "@/components/ui";
 
 export default function AdminOrders() {
@@ -21,7 +22,7 @@ export default function AdminOrders() {
       {orders.length === 0 ? (
         <Empty>Δεν υπάρχουν παραγγελίες.</Empty>
       ) : (
-        <ul className="space-y-2">
+        <ScrollRows className="space-y-2">
           {orders.map((o) => (
             <li key={o.id} className="card flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
               <div>
@@ -34,7 +35,7 @@ export default function AdminOrders() {
               </div>
             </li>
           ))}
-        </ul>
+        </ScrollRows>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { testDb } from "./testdb";
-import { placeOrder, cancelOrder, markShipped, markDelivered, returnOrder } from "./orders";
+import { placeOrder, cancelOrder, completeOrder, requestReturn, returnOrder } from "./orders";
 import { storeBalance } from "./ledger";
 
 const buyer = { name: "Α", email: "a@b.gr", phone: "69" };
@@ -46,21 +46,35 @@ describe("cancel / return", () => {
     expect(db.products[0].stock[0].quantity).toBe(2);
     expect(storeBalance(db, "s1")).toBe(0);
   });
-  it("cannot cancel after shipped", () => {
+  it("cannot cancel once completed", () => {
     let db = place(1);
     const id = db.orders[0].id;
-    db = markShipped(db, id, "BX123");
+    db = completeOrder(db, id, "BX123", now);
     expect(() => cancelOrder(db, id, "x", now)).toThrow();
   });
-  it("shipping needs a tracking code", () => {
-    const db = place(1);
-    expect(() => markShipped(db, db.orders[0].id, "  ")).toThrow();
+  it("completing works without a tracking code and leaves none on the order", () => {
+    const db = completeOrder(place(1), "o1", "  ", now);
+    expect(db.orders[0].status).toBe("completed");
+    expect(db.orders[0].trackingCode).toBeUndefined();
   });
-  it("return after delivery restocks and reverses ledger", () => {
+  it("keeps the tracking code when there is one", () => {
+    const db = completeOrder(place(1), "o1", " BX9 ", now);
+    expect(db.orders[0].trackingCode).toBe("BX9");
+  });
+  it("cannot complete twice", () => {
+    const db = completeOrder(place(1), "o1", "", now);
+    expect(() => completeOrder(db, "o1", "", now)).toThrow();
+  });
+  it("only a completed order can be returned or have a return requested", () => {
+    const db = place(1);
+    expect(() => returnOrder(db, "o1", now)).toThrow();
+    expect(() => requestReturn(db, "o1")).toThrow();
+  });
+  it("return after completion restocks and reverses ledger", () => {
     let db = place(1);
     const id = db.orders[0].id;
-    db = markDelivered(markShipped(db, id, "BX1"), id, now);
-    expect(db.orders[0].deliveredAt).toBe(now);
+    db = completeOrder(db, id, "BX1", now);
+    expect(db.orders[0].completedAt).toBe(now);
     db = returnOrder(db, id, now);
     expect(db.orders[0].status).toBe("returned");
     expect(db.products[0].stock[0].quantity).toBe(2);

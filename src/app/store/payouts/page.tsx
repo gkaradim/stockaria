@@ -3,6 +3,7 @@
 import { getStoreLedger, listPayouts } from "@/lib/api";
 import { useApi, useStoreId } from "@/lib/hooks";
 import { formatEUR } from "@/lib/logic/money";
+import ScrollRows from "@/components/ScrollRows";
 import { Empty, Loading, StatCard } from "@/components/ui";
 import type { LedgerType } from "@/lib/types";
 
@@ -50,7 +51,7 @@ export default function StorePayouts() {
         {!payouts || payouts.length === 0 ? (
           <Empty>Δεν έχει γίνει πληρωμή ακόμα.</Empty>
         ) : (
-          <ul className="card divide-y divide-line">
+          <ScrollRows className="card divide-y divide-line">
             {payouts.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
                 <div>
@@ -63,20 +64,20 @@ export default function StorePayouts() {
                 </div>
               </li>
             ))}
-          </ul>
+          </ScrollRows>
         )}
       </section>
 
       <section className="mt-6">
         <h2 className="h2 mb-2">Κινήσεις</h2>
-        <ul className="card divide-y divide-line text-sm">
-          {ledger.entries.slice(0, 30).map((e) => (
+        <ScrollRows className="card divide-y divide-line text-sm">
+          {ledger.entries.map((e) => (
             <li key={e.id} className="flex justify-between gap-3 p-3">
               <span>{TYPE_LABEL[e.type]}{e.orderId ? ` · ${e.orderId}` : ""}<span className="ml-2 text-muted">{new Date(e.createdAt).toLocaleDateString("el-GR")}</span></span>
               <span className={`shrink-0 font-semibold ${e.amountCents < 0 ? "text-danger" : ""}`}>{formatEUR(e.amountCents)}</span>
             </li>
           ))}
-        </ul>
+        </ScrollRows>
       </section>
     </div>
   );

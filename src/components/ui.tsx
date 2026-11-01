@@ -18,9 +18,7 @@ export function Img({ src, alt, className }: { src?: string; alt: string; classN
 
 const STATUS: Record<OrderStatus, { label: string; cls: string }> = {
   new: { label: "Νέα", cls: "bg-warn-soft text-amber-900" },
-  preparing: { label: "Ετοιμάζεται", cls: "bg-sky-100 text-sky-900" },
-  shipped: { label: "Στάλθηκε", cls: "bg-indigo-100 text-indigo-900" },
-  delivered: { label: "Παραδόθηκε", cls: "bg-accent-soft text-accent-strong" },
+  completed: { label: "Ολοκληρώθηκε", cls: "bg-accent-soft text-accent-strong" },
   cancelled: { label: "Ακυρώθηκε", cls: "bg-danger-soft text-danger" },
   returned: { label: "Επιστράφηκε", cls: "bg-stone-200 text-stone-800" },
 };

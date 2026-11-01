@@ -1,7 +1,7 @@
 import type { Db, Product, Store } from "./types";
 import { DEFAULT_COMMISSION } from "./logic/constants";
 import { emptyDb } from "./logic/empty";
-import { markDelivered, markShipped, placeOrder } from "./logic/orders";
+import { completeOrder, placeOrder } from "./logic/orders";
 
 const COLORS = ["#c9d6df", "#e8d5c4", "#d4e0c7", "#e5cfd8", "#d9d4ec", "#f0e2b6", "#bfd8d5", "#e9c9c0"];
 
@@ -80,7 +80,7 @@ export function seedDb(nowISO = new Date().toISOString()): Db {
   db.users.push({ email: "admin@stockaria.gr", name: "Διαχειριστής", role: "admin" });
   for (const s of db.stores) db.users.push({ email: s.ownerEmail, name: s.ownerName, role: "store", storeId: s.id });
 
-  // Past delivered orders so dashboards have data on first load, then one fresh order per store.
+  // Past completed orders so dashboards have data on first load, then one fresh order per store.
   let working = db;
   const buyer = (i: number) => ({ name: `Πελάτης ${i}`, email: `pelatis${i}@example.gr`, phone: "6900000000" });
   // One demo customer who bought from every store, so the customer account has orders to show.
@@ -95,7 +95,7 @@ export function seedDb(nowISO = new Date().toISOString()): Db {
       b += 1;
       working = placeOrder(working, { storeId, lines: [{ productId: product.id, size, qty: 1 }], buyer: k === 0 ? maria : buyer(b), delivery }, ago(d));
       const id = working.orders[working.orders.length - 1].id;
-      working = markDelivered(markShipped(working, id, `BX${1000 + b}`), id, ago(d - 3));
+      working = completeOrder(working, id, `BX${1000 + b}`, ago(d - 3));
     });
     const fresh = products[3];
     b += 1;

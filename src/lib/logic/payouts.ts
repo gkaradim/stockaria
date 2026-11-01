@@ -7,10 +7,10 @@ function isEligible(db: Db, entry: LedgerEntry, cutoff: string) {
   const order = db.orders.find((o) => o.id === entry.orderId);
   if (!order) return false;
   if (order.status === "cancelled" || order.status === "returned") return true; // sale and reversal settle together
-  return order.status === "delivered" && !!order.deliveredAt && order.deliveredAt <= cutoff;
+  return order.status === "completed" && !!order.completedAt && order.completedAt <= cutoff;
 }
 
-/** Settles delivered orders up to `cutoff` plus any refunds. Skips when the total is not positive. */
+/** Settles completed orders up to `cutoff` plus any refunds. Skips when the total is not positive. */
 export function createPayoutBatch(input: Db, storeId: string, cutoff: string, now: string): Db {
   const db = structuredClone(input);
   const eligible = db.ledger.filter((e) => e.storeId === storeId && isEligible(db, e, cutoff));

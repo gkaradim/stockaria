@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createPayouts, listPayouts, listStores, markPayoutPaid } from "@/lib/api";
 import { useApi } from "@/lib/hooks";
 import { formatEUR } from "@/lib/logic/money";
+import ScrollRows from "@/components/ScrollRows";
 import { Empty, Loading } from "@/components/ui";
 
 export default function AdminPayouts() {
@@ -40,7 +41,7 @@ export default function AdminPayouts() {
       {payouts.length === 0 ? (
         <Empty>Δεν έχουν δημιουργηθεί πληρωμές.</Empty>
       ) : (
-        <ul className="space-y-3">
+        <ScrollRows className="space-y-3">
           {payouts.map((p) => (
             <li key={p.id} className="card flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
               <div>
@@ -57,7 +58,7 @@ export default function AdminPayouts() {
               </div>
             </li>
           ))}
-        </ul>
+        </ScrollRows>
       )}
     </div>
   );

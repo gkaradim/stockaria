@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { cancelOrder, getOrder, markDelivered, markPreparing, markShipped, returnOrder } from "@/lib/api";
+import { cancelOrder, completeOrder, getOrder, returnOrder } from "@/lib/api";
 import { useApi, useStoreId } from "@/lib/hooks";
 import { formatEUR } from "@/lib/logic/money";
 import { Empty, ErrorNote, Loading, StatusBadge } from "@/components/ui";
@@ -33,39 +33,42 @@ function OrderDetail() {
       </div>
       <p className="mb-5 text-sm text-muted">{new Date(order.createdAt).toLocaleString("el-GR")}</p>
 
-      {(order.status === "new" || order.status === "preparing") && (
-        <section className="mb-5 card space-y-3 p-4">
-          <div className="font-bold">Τι να κάνεις</div>
-          {order.status === "new" && (
-            <button className="btn btn-outline w-full" onClick={() => run(() => markPreparing(order.id))}>Το ετοιμάζω</button>
-          )}
+      <section className="mb-5 card space-y-3 p-4">
+        {order.status === "new" && (
           <div>
-            <label className="label" htmlFor="code">Κωδικός παρακολούθησης (Box Now ή courier)</label>
-            <div className="flex gap-2">
-              <input id="code" className="input" value={code} onChange={(e) => setCode(e.target.value)} placeholder="π.χ. BX123456" />
-              <button className="btn btn-primary shrink-0" onClick={() => run(() => markShipped(order.id, code))}>Στάλθηκε</button>
-            </div>
+            <label className="label" htmlFor="code">Κωδικός παρακολούθησης (προαιρετικός)</label>
+            <input id="code" className="input" value={code} onChange={(e) => setCode(e.target.value)} placeholder="π.χ. BX123456" />
+            <p className="mt-1 text-xs text-muted">Αν βάλεις κωδικό, θα εμφανιστεί στον πελάτη στο email ολοκλήρωσης. Αλλιώς δεν θα φαίνεται.</p>
           </div>
+        )}
+        {order.trackingCode && order.status !== "new" && <div className="text-sm">Κωδικός παρακολούθησης: <strong>{order.trackingCode}</strong></div>}
+        <div className="grid gap-2 sm:grid-cols-2">
           <button
-            className="btn btn-sm text-danger"
-            onClick={() => { if (confirm("Δεν υπάρχει το προϊόν; Η παραγγελία θα ακυρωθεί και ο πελάτης θα πάρει πίσω τα χρήματα.")) run(() => cancelOrder(order.id, "Το προϊόν δεν είναι πλέον διαθέσιμο")); }}
+            className="btn btn-primary"
+            disabled={order.status !== "new"}
+            onClick={() => run(() => completeOrder(order.id, code))}
           >
-            Δεν υπάρχει το προϊόν (ακύρωση και επιστροφή χρημάτων)
+            {order.status === "completed" || order.status === "returned" ? "Ολοκληρωμένη" : "Ολοκλήρωση"}
           </button>
-        </section>
-      )}
-      {order.status === "shipped" && (
-        <section className="mb-5 card space-y-2 p-4">
-          <div>Κωδικός: <strong>{order.trackingCode}</strong></div>
-          <button className="btn btn-primary w-full" onClick={() => run(() => markDelivered(order.id))}>Σημείωση ως παραδομένο</button>
-        </section>
-      )}
-      {order.status === "delivered" && order.returnRequested && (
-        <section className="mb-5 card space-y-2 bg-warn-soft p-4">
-          <div className="font-semibold">Ο πελάτης ζήτησε επιστροφή</div>
-          <button className="btn btn-primary w-full" onClick={() => run(() => returnOrder(order.id))}>Επιβεβαίωση επιστροφής (το προϊόν επέστρεψε)</button>
-        </section>
-      )}
+          <button
+            className="btn btn-danger"
+            disabled={order.status !== "new"}
+            onClick={() => { if (confirm("Η παραγγελία θα ακυρωθεί και ο πελάτης θα πάρει πίσω τα χρήματα. Να συνεχίσω;")) run(() => cancelOrder(order.id, "Ακυρώθηκε από το κατάστημα")); }}
+          >
+            {order.status === "cancelled" ? "Ακυρώθηκε" : "Ακύρωση"}
+          </button>
+        </div>
+        {(order.status === "completed" || order.status === "returned") && (
+          <button
+            className="btn btn-outline w-full"
+            disabled={order.status === "returned"}
+            onClick={() => { if (confirm("Το προϊόν επέστρεψε; Η παραγγελία θα σημειωθεί ως επιστραφείσα και ο πελάτης θα πάρει πίσω τα χρήματα.")) run(() => returnOrder(order.id)); }}
+          >
+            {order.status === "returned" ? "Επιστράφηκε" : "Επιστράφηκε το προϊόν"}
+          </button>
+        )}
+        {order.status === "completed" && order.returnRequested && <p className="rounded-xl bg-warn-soft p-3 text-sm font-semibold">Ο πελάτης ζήτησε επιστροφή.</p>}
+      </section>
       {error && <div className="mb-4"><ErrorNote message={error} /></div>}
 
       <section className="card divide-y divide-line">

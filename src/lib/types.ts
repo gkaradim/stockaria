@@ -1,5 +1,5 @@
 export type StoreStatus = "pending" | "approved" | "suspended";
-export type OrderStatus = "new" | "preparing" | "shipped" | "delivered" | "cancelled" | "returned";
+export type OrderStatus = "new" | "completed" | "cancelled" | "returned";
 export type ParcelSize = "S" | "M" | "L";
 export type LedgerType = "sale" | "commission" | "refund" | "commission_reversal" | "payout";
 
@@ -79,7 +79,7 @@ export interface Order {
   cancelReason?: string;
   returnRequested?: boolean;
   createdAt: string;
-  deliveredAt?: string;
+  completedAt?: string;
 }
 
 export interface LedgerEntry {

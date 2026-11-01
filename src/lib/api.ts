@@ -1,4 +1,4 @@
-import type { Buyer, Db, Delivery, LedgerEntry, Order, OrderStatus, Payout, Product, Store } from "./types";
+import type { Buyer, Db, Delivery, LedgerEntry, Order, OrderStatus, Payout, Product, Store, User } from "./types";
 import { loadDb, resetDb, saveDb } from "./storage";
 import { addToCart as addToCartLogic, removeFromCart as removeFromCartLogic, setQty as setQtyLogic } from "./logic/cart";
 import { SHIPPING_CENTS, DEFAULT_COMMISSION } from "./logic/constants";
@@ -6,9 +6,7 @@ import { storeBalance } from "./logic/ledger";
 import { discountPercent, parcelFor } from "./logic/money";
 import {
   cancelOrder as cancelOrderLogic,
-  markDelivered as markDeliveredLogic,
-  markPreparing as markPreparingLogic,
-  markShipped as markShippedLogic,
+  completeOrder as completeOrderLogic,
   placeOrder,
   requestReturn as requestReturnLogic,
   returnOrder as returnOrderLogic,
@@ -157,14 +155,8 @@ export async function listOrders(f: { storeId?: string; email?: string; status?:
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-export async function markPreparing(id: string) {
-  mutate((db) => markPreparingLogic(db, id));
-}
-export async function markShipped(id: string, trackingCode: string) {
-  mutate((db) => markShippedLogic(db, id, trackingCode));
-}
-export async function markDelivered(id: string) {
-  mutate((db) => markDeliveredLogic(db, id, now()));
+export async function completeOrder(id: string, trackingCode: string) {
+  mutate((db) => completeOrderLogic(db, id, trackingCode, now()));
 }
 export async function cancelOrder(id: string, reason: string) {
   mutate((db) => cancelOrderLogic(db, id, reason, now()));
@@ -174,6 +166,22 @@ export async function requestReturn(id: string) {
 }
 export async function returnOrder(id: string) {
   mutate((db) => returnOrderLogic(db, id, now()));
+}
+
+// ---------- customer profile ----------
+
+export async function getCustomer(email: string): Promise<User | null> {
+  return loadDb().users.find((u) => u.role === "customer" && u.email === email) ?? null;
+}
+
+export async function updateCustomer(email: string, patch: { name: string; phone: string }) {
+  mutate((db) => {
+    const user = db.users.find((u) => u.role === "customer" && u.email === email);
+    if (!user) throw new Error("Δεν βρέθηκε ο λογαριασμός");
+    user.name = patch.name.trim() || undefined;
+    user.phone = patch.phone.trim() || undefined;
+    return db;
+  });
 }
 
 // ---------- store panel ----------

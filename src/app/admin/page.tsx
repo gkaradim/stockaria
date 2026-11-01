@@ -7,6 +7,8 @@ import { useApi } from "@/lib/hooks";
 import { actAsStore } from "@/lib/session";
 import type { Store, StoreStatus } from "@/lib/types";
 import { Empty, ErrorNote, Loading } from "@/components/ui";
+import Modal from "@/components/Modal";
+import ScrollRows from "@/components/ScrollRows";
 
 const TABS: { status: StoreStatus; label: string }[] = [
   { status: "pending", label: "Σε αναμονή" },
@@ -21,18 +23,22 @@ export default function AdminStores() {
   const [invite, setInvite] = useState({ name: "", afm: "", ownerEmail: "" });
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   if (loading || !stores) return <Loading />;
   const list = stores.filter((s) => s.status === tab);
 
   function manage(s: Store) {
     actAsStore(s.id);
-    router.push("/store/");
+    router.push("/store/products/");
   }
 
   return (
     <div className="page">
-      <h1 className="h1 mb-4">Καταστήματα</h1>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h1 className="h1">Καταστήματα</h1>
+        <button className="btn btn-primary" onClick={() => { setError(""); setLink(""); setInviteOpen(true); }}>+ Νέο κατάστημα</button>
+      </div>
 
       <div className="mb-4 flex gap-2 overflow-x-auto">
         {TABS.map((t) => (
@@ -45,7 +51,7 @@ export default function AdminStores() {
       {list.length === 0 ? (
         <Empty>Δεν υπάρχουν καταστήματα σε αυτή την κατηγορία.</Empty>
       ) : (
-        <ul className="space-y-3">
+        <ScrollRows className="space-y-3">
           {list.map((s) => (
             <li key={s.id} className="card p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -63,11 +69,11 @@ export default function AdminStores() {
               </div>
             </li>
           ))}
-        </ul>
+        </ScrollRows>
       )}
 
-      <section className="mt-8 card max-w-lg p-5">
-        <h2 className="h2 mb-3">Νέο κατάστημα με πρόσκληση</h2>
+      {inviteOpen && (
+        <Modal title="Νέο κατάστημα με πρόσκληση" onClose={() => setInviteOpen(false)}>
         <form
           className="space-y-3"
           onSubmit={async (e) => {
@@ -88,7 +94,8 @@ export default function AdminStores() {
           <button className="btn btn-primary w-full">Δημιουργία και πρόσκληση</button>
         </form>
         {link && <p className="mt-3 break-words rounded-xl bg-accent-soft p-3 text-sm text-accent-strong">Το κατάστημα δημιουργήθηκε (σε αναμονή). Στο πραγματικό σύστημα θα στέλνεται email πρόσκλησης. Σύνδεσμος για δοκιμή: {link}</p>}
-      </section>
+        </Modal>
+      )}
     </div>
   );
 }

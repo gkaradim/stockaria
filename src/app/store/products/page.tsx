@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { deleteProduct, duplicateProduct, getStoreProducts, setProductStatus } from "@/lib/api";
 import { useApi, useStoreId } from "@/lib/hooks";
 import { formatEUR } from "@/lib/logic/money";
+import ScrollRows from "@/components/ScrollRows";
 import { Empty, Img, Loading } from "@/components/ui";
 
 const STATUS_LABEL = { active: "Ενεργό", draft: "Πρόχειρο", hidden: "Κρυφό" } as const;
@@ -26,7 +27,7 @@ export default function StoreProducts() {
       ) : !products || products.length === 0 ? (
         <Empty>Δεν έχεις προϊόντα ακόμα. Πάτα «Νέο προϊόν» για να ανεβάσεις το πρώτο.</Empty>
       ) : (
-        <ul className="space-y-3">
+        <ScrollRows className="space-y-3">
           {products.map((p) => (
             <li key={p.id} className="card flex gap-3 p-3">
               <Img src={p.images[0]} alt={p.title} className="size-20 shrink-0 rounded-xl bg-stone-100 object-cover" />
@@ -50,7 +51,7 @@ export default function StoreProducts() {
               </div>
             </li>
           ))}
-        </ul>
+        </ScrollRows>
       )}
     </div>
   );

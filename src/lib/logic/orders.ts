@@ -78,7 +78,7 @@ export function placeOrder(input: Db, { storeId, lines, buyer, delivery }: Place
 export function cancelOrder(input: Db, orderId: string, reason: string, now: string): Db {
   const db = structuredClone(input);
   const order = findOrder(db, orderId);
-  if (order.status !== "new" && order.status !== "preparing") {
+  if (order.status !== "new") {
     throw new Error("Η παραγγελία δεν μπορεί να ακυρωθεί σε αυτό το στάδιο");
   }
   restock(db, order);
@@ -88,37 +88,21 @@ export function cancelOrder(input: Db, orderId: string, reason: string, now: str
   return db;
 }
 
-export function markPreparing(input: Db, orderId: string): Db {
+/** The store hands the parcel over. The tracking code is optional: the customer only sees it when there is one. */
+export function completeOrder(input: Db, orderId: string, trackingCode: string, now: string): Db {
   const db = structuredClone(input);
   const order = findOrder(db, orderId);
-  if (order.status !== "new") throw new Error("Η παραγγελία δεν είναι νέα");
-  order.status = "preparing";
-  return db;
-}
-
-export function markShipped(input: Db, orderId: string, trackingCode: string): Db {
-  const db = structuredClone(input);
-  const order = findOrder(db, orderId);
-  if (order.status !== "new" && order.status !== "preparing") throw new Error("Η παραγγελία δεν μπορεί να σταλεί");
-  if (!trackingCode.trim()) throw new Error("Βάλε τον κωδικό παρακολούθησης");
-  order.status = "shipped";
-  order.trackingCode = trackingCode.trim();
-  return db;
-}
-
-export function markDelivered(input: Db, orderId: string, now: string): Db {
-  const db = structuredClone(input);
-  const order = findOrder(db, orderId);
-  if (order.status !== "shipped") throw new Error("Η παραγγελία δεν έχει σταλεί");
-  order.status = "delivered";
-  order.deliveredAt = now;
+  if (order.status !== "new") throw new Error("Η παραγγελία δεν μπορεί να ολοκληρωθεί");
+  order.status = "completed";
+  order.completedAt = now;
+  if (trackingCode.trim()) order.trackingCode = trackingCode.trim();
   return db;
 }
 
 export function requestReturn(input: Db, orderId: string): Db {
   const db = structuredClone(input);
   const order = findOrder(db, orderId);
-  if (order.status !== "delivered") throw new Error("Η παραγγελία δεν έχει παραδοθεί");
+  if (order.status !== "completed") throw new Error("Η παραγγελία δεν έχει ολοκληρωθεί");
   order.returnRequested = true;
   return db;
 }
@@ -126,7 +110,7 @@ export function requestReturn(input: Db, orderId: string): Db {
 export function returnOrder(input: Db, orderId: string, now: string): Db {
   const db = structuredClone(input);
   const order = findOrder(db, orderId);
-  if (order.status !== "delivered") throw new Error("Επιστροφή γίνεται μόνο σε παραδομένη παραγγελία");
+  if (order.status !== "completed") throw new Error("Επιστροφή γίνεται μόνο σε ολοκληρωμένη παραγγελία");
   restock(db, order);
   reverseLedger(db, order, now);
   order.status = "returned";

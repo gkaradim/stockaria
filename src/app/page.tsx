@@ -35,7 +35,7 @@ function Browse() {
     <div className="page">
       <section className="mb-5 rounded-3xl bg-accent-soft px-5 py-6 md:px-10 md:py-10">
         <h1 className="h1 max-w-xl text-accent-strong">Καινούρια ρούχα και παπούτσια από καταστήματα, σε τιμές outlet</h1>
-        <p className="mt-2 max-w-xl text-accent-strong/80">Ό,τι περίσσεψε από τη σεζόν, από πραγματικά καταστήματα με ΑΦΜ. Η αγορά είναι δωρεάν για σένα, χωρίς χρέωση πλατφόρμας.</p>
+        <p className="mt-2 max-w-xl text-accent-strong/80">Ό,τι περίσσεψε από τη σεζόν, από πραγματικά καταστήματα με ΑΦΜ.</p>
       </section>
 
       <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0">
