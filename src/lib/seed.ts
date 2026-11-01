@@ -83,6 +83,8 @@ export function seedDb(nowISO = new Date().toISOString()): Db {
   // Past delivered orders so dashboards have data on first load, then one fresh order per store.
   let working = db;
   const buyer = (i: number) => ({ name: `Πελάτης ${i}`, email: `pelatis${i}@example.gr`, phone: "6900000000" });
+  // One demo customer who bought from every store, so the customer account has orders to show.
+  const maria = { name: "Μαρία Παπαδοπούλου", email: "maria@example.gr", phone: "6900000000" };
   const delivery = { type: "locker" as const, text: "Box Now, Σύνταγμα" };
   let b = 0;
   for (const storeId of ["s1", "s2", "s3"]) {
@@ -91,13 +93,13 @@ export function seedDb(nowISO = new Date().toISOString()): Db {
       const product = products[k];
       const size = product.stock[0].size;
       b += 1;
-      working = placeOrder(working, { storeId, lines: [{ productId: product.id, size, qty: 1 }], buyer: buyer(b), delivery }, ago(d));
+      working = placeOrder(working, { storeId, lines: [{ productId: product.id, size, qty: 1 }], buyer: k === 0 ? maria : buyer(b), delivery }, ago(d));
       const id = working.orders[working.orders.length - 1].id;
       working = markDelivered(markShipped(working, id, `BX${1000 + b}`), id, ago(d - 3));
     });
     const fresh = products[3];
     b += 1;
-    working = placeOrder(working, { storeId, lines: [{ productId: fresh.id, size: fresh.stock[0].size, qty: 1 }], buyer: buyer(b), delivery }, ago(0.05));
+    working = placeOrder(working, { storeId, lines: [{ productId: fresh.id, size: fresh.stock[0].size, qty: 1 }], buyer: storeId === "s3" ? buyer(b) : maria, delivery }, ago(0.05));
   }
   return working;
 }

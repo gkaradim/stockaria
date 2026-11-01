@@ -2,12 +2,41 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import EmailLinkForm from "@/components/EmailLinkForm";
 import { Loading } from "@/components/ui";
+import { consumeLink } from "@/lib/session";
 
 type Role = "customer" | "store";
 type Mode = "login" | "register";
+
+const DEMO = [
+  { label: "Διαχειριστής", note: "Έγκριση καταστημάτων, παραγγελίες, πληρωμές", email: "admin@stockaria.gr", role: "admin", to: "/admin/" },
+  { label: "Κατάστημα (Ελένη)", note: "Dashboard, προϊόντα, παραγγελίες, πληρωμές", email: "eleni@example.gr", role: "store", to: "/store/" },
+  { label: "Πελάτης (Μαρία)", note: "Παραγγελίες από τρία καταστήματα", email: "maria@example.gr", role: "customer", to: "/account/" },
+] as const;
+
+function DemoAccounts() {
+  const router = useRouter();
+  return (
+    <div className="mt-8">
+      <h2 className="h2 mb-1">Δοκιμαστικοί λογαριασμοί</h2>
+      <p className="mb-3 text-sm text-muted">Είσοδος με ένα κλικ, με έτοιμα δεδομένα.</p>
+      <div className="space-y-2">
+        {DEMO.map((d) => (
+          <button
+            key={d.email}
+            className="card w-full p-4 text-left transition hover:border-accent"
+            onClick={() => { consumeLink(d.email, d.role); router.push(d.to); }}
+          >
+            <div className="font-bold">{d.label}</div>
+            <div className="text-sm text-muted">{d.note}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Login() {
   const initial = useSearchParams().get("role");
@@ -61,6 +90,7 @@ function Login() {
           )}
         </div>
       )}
+      <DemoAccounts />
     </div>
   );
 }
