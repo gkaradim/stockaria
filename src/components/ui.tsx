@@ -2,6 +2,17 @@ import type { OrderStatus } from "@/lib/types";
 
 /* eslint-disable @next/next/no-img-element */
 export function Img({ src, alt, className }: { src?: string; alt: string; className?: string }) {
+  if (!src) {
+    return (
+      <div role="img" aria-label={alt} className={`${className ?? ""} flex items-center justify-center bg-stone-100 text-stone-400`}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <circle cx="9" cy="10" r="1.5" />
+          <path d="m21 16-5-5-8 8" />
+        </svg>
+      </div>
+    );
+  }
   return <img src={src} alt={alt} className={className} loading="lazy" />;
 }
 

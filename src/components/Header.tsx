@@ -28,9 +28,9 @@ export default function Header() {
     session?.role === "admin"
       ? { href: "/admin/", label: "Διαχείριση" }
       : session?.role === "store"
-        ? { href: "/store/", label: "Το κατάστημά μου" }
+        ? { href: "/store/", label: "Κατάστημα" }
         : session?.role === "customer"
-          ? { href: "/account/", label: "Οι παραγγελίες μου" }
+          ? { href: "/account/", label: "Παραγγελίες" }
           : null;
 
   return (
@@ -47,7 +47,7 @@ export default function Header() {
             router.push(q.trim() ? `/?q=${encodeURIComponent(q.trim())}` : "/");
           }}
         >
-          <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Αναζήτηση ρούχων, παπουτσιών, καταστημάτων" aria-label="Αναζήτηση" />
+          <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Αναζήτηση προϊόντων ή καταστημάτων" aria-label="Αναζήτηση" />
         </form>
 
         <nav className="order-2 ml-auto flex items-center gap-2 md:order-3">

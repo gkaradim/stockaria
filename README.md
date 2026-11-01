@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# stockaria.gr (prototype)
 
-## Getting Started
+Clickable, mobile-first prototype of a marketplace where shops sell their unsold new clothes and shoes. Everything is stored in the browser (`localStorage`): no backend, no emails, no real payments.
 
-First, run the development server:
+Design: [docs/superpowers/specs/2026-11-01-stockaria-design.md](docs/superpowers/specs/2026-11-01-stockaria-design.md)
+Plan: [docs/superpowers/plans/2026-11-01-stockaria-prototype.md](docs/superpowers/plans/2026-11-01-stockaria-prototype.md)
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm test         # business logic tests
+npm run build    # static export to ./out
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Demo accounts (email link login is simulated)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Store: `eleni@example.gr`, `nikos@example.gr`, `kostas@example.gr`
+- Admin: `/admin/login/` with `admin@stockaria.gr`
+- Customer: any email, or buy as a guest.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The "Επαναφορά" link in the yellow banner restores the demo data.
 
-## Learn More
+## Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `src/lib/logic/`: pure, tested business rules (orders, ledger, cart, payouts, stats).
+- `src/lib/api.ts`: the only data access layer the UI uses. Replace it with Supabase in phase 2.
+- `src/app/`: pages. Detail pages use query strings (`/product/?id=...`) so the app can be exported statically.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Publish to GitHub Pages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`.github/workflows/pages.yml` builds the static export on every push to `main`. After pushing, enable it in the repository: Settings, Pages, Source: GitHub Actions. The site is then at `https://<user>.github.io/<repo>/`. On a free GitHub account Pages needs a public repository.
