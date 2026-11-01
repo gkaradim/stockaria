@@ -28,7 +28,7 @@ export default function CartPage() {
         <div className="space-y-5">
           {carts.map((cart) => (
             <section key={cart.store.id} className="card overflow-hidden">
-              <header className="border-b border-line bg-stone-50 px-4 py-3 font-bold">{cart.store.name}</header>
+              <header className="border-b border-line bg-stone-50 px-4 py-3 font-bold"><Link href={`/shop/?id=${cart.store.id}`} className="hover:underline">{cart.store.name}</Link></header>
               <ul className="divide-y divide-line">
                 {cart.lines.map((l) => {
                   const max = l.product.stock.find((s) => s.size === l.size)?.quantity ?? 0;

@@ -25,8 +25,10 @@ const STATUS: Record<OrderStatus, { label: string; cls: string }> = {
 
 export const statusLabel = (s: OrderStatus) => STATUS[s].label;
 
-export function StatusBadge({ status }: { status: OrderStatus }) {
+/** `customer` shows the buyer's wording: a new order is "waiting" for the store. */
+export function StatusBadge({ status, customer = false }: { status: OrderStatus; customer?: boolean }) {
   const { label, cls } = STATUS[status];
+  if (customer && status === "new") return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>Σε αναμονή</span>;
   return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}>{label}</span>;
 }
 

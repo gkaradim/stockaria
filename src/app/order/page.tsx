@@ -25,9 +25,9 @@ function OrderTracking() {
     <div className="page max-w-2xl">
       <div className="mb-1 flex items-center gap-3">
         <h1 className="h1">Παραγγελία {order.id}</h1>
-        <StatusBadge status={order.status} />
+        <StatusBadge status={order.status} customer />
       </div>
-      <p className="mb-5 text-sm text-muted">Από {store?.name ?? "..."} · {new Date(order.createdAt).toLocaleDateString("el-GR")}</p>
+      <p className="mb-5 text-sm text-muted">Από {store ? <Link href={`/shop/?id=${store.id}`} className="font-semibold text-accent underline">{store.name}</Link> : "..."} · {new Date(order.createdAt).toLocaleDateString("el-GR")}</p>
 
       {order.status === "cancelled" ? (
         <p className="mb-5 rounded-xl bg-danger-soft p-3 text-sm text-danger">Η παραγγελία ακυρώθηκε{order.cancelReason ? `: ${order.cancelReason}` : ""}. Θα γίνει επιστροφή των χρημάτων.</p>

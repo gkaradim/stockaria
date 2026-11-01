@@ -49,7 +49,7 @@ function ProductDetail() {
         <h1 className="h1 mt-1">{product.title}</h1>
         <p className="mt-1 text-sm">
           Από το κατάστημα{" "}
-          <Link href={`/?store=${product.storeId}`} className="font-semibold text-accent underline">
+          <Link href={`/shop/?id=${product.storeId}`} className="font-semibold text-accent underline">
             {product.storeName}
           </Link>
         </p>

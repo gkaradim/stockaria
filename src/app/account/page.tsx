@@ -31,7 +31,7 @@ function Orders() {
                   <div className="font-semibold">Παραγγελία {o.id}</div>
                   <div className="text-sm text-muted">{new Date(o.createdAt).toLocaleDateString("el-GR")} · {o.items.length} προϊόντα · {formatEUR(o.totalCents)}</div>
                 </div>
-                <StatusBadge status={o.status} />
+                <StatusBadge status={o.status} customer />
               </Link>
             </li>
           ))}
